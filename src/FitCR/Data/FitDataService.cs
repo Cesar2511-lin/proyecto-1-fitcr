@@ -1,0 +1,148 @@
+using System.Text.Json;
+using FitCR.Models;
+
+namespace FitCR.Data;
+
+/// <summary>
+/// Implementación concreta del repositorio utilizando persistencia JSON (Sprint 1: Usuarios y Entrenadores).
+/// </summary>
+public class FitDataService : IFitRepository
+{
+    private static FitDataService? _instancia;
+    public static FitDataService Instancia => _instancia ??= new FitDataService();
+
+    private readonly string _rutaArchivo;
+    private List<UsuarioBasico> _usuarios = new();
+    private List<Entrenador> _entrenadores = new();
+
+    public FitDataService(string? rutaPersonalizada = null)
+    {
+        _rutaArchivo = rutaPersonalizada ?? DeterminarRutaDatos();
+        CargarDatos();
+    }
+
+    private static string DeterminarRutaDatos()
+    {
+        var opciones = new[]
+        {
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "datos_iniciales.json"),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "datos_iniciales.json"),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "datos_iniciales.json"),
+            "datos_iniciales.json"
+        };
+
+        foreach (var ruta in opciones)
+        {
+            var rutaNormalizada = Path.GetFullPath(ruta);
+            if (File.Exists(rutaNormalizada))
+            {
+                return rutaNormalizada;
+            }
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "datos_iniciales.json");
+    }
+
+    public void CargarDatos()
+    {
+        if (!File.Exists(_rutaArchivo))
+        {
+            _usuarios = new List<UsuarioBasico>();
+            _entrenadores = new List<Entrenador>();
+            return;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(_rutaArchivo);
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("UsuariosBasicos", out var elemUsuarios))
+            {
+                _usuarios = JsonSerializer.Deserialize<List<UsuarioBasico>>(elemUsuarios.GetRawText(), new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new List<UsuarioBasico>();
+            }
+
+            _entrenadores = new List<Entrenador>();
+            if (root.TryGetProperty("Entrenadores", out var elemEntrenadores))
+            {
+                foreach (var item in elemEntrenadores.EnumerateArray())
+                {
+                    var rol = item.TryGetProperty("Rol", out var r) ? r.GetString() : "EntrenadorGimnasio";
+                    if (string.Equals(rol, "EntrenadorPersonal", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var ep = JsonSerializer.Deserialize<EntrenadorPersonal>(item.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        if (ep != null) _entrenadores.Add(ep);
+                    }
+                    else
+                    {
+                        var eg = JsonSerializer.Deserialize<EntrenadorGimnasio>(item.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        if (eg != null) _entrenadores.Add(eg);
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            _usuarios = new List<UsuarioBasico>();
+            _entrenadores = new List<Entrenador>();
+        }
+    }
+
+    public void GuardarCambios()
+    {
+        try
+        {
+            var estructura = new
+            {
+                Metadatos = new
+                {
+                    Sistema = "Fit.CR",
+                    Version = "1.0.0",
+                    UltimaModificacion = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    TotalRegistros = _usuarios.Count + _entrenadores.Count
+                },
+                UsuariosBasicos = _usuarios,
+                Entrenadores = _entrenadores
+            };
+
+            var json = JsonSerializer.Serialize(estructura, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            File.WriteAllText(_rutaArchivo, json);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error al guardar JSON: {ex.Message}");
+        }
+    }
+
+    public List<UsuarioBasico> ObtenerUsuarios() => _usuarios;
+
+    public List<Entrenador> ObtenerEntrenadores() => _entrenadores;
+
+    public void GuardarUsuario(UsuarioBasico usuario)
+    {
+        var index = _usuarios.FindIndex(u => u.Id == usuario.Id);
+        if (index >= 0)
+        {
+            _usuarios[index] = usuario;
+        }
+        else
+        {
+            _usuarios.Add(usuario);
+        }
+        GuardarCambios();
+    }
+
+    public void EliminarUsuario(string usuarioId)
+    {
+        _usuarios.RemoveAll(u => u.Id == usuarioId);
+        GuardarCambios();
+    }
+}
