@@ -4,7 +4,7 @@ Sistema de gestión para acondicionamiento físico, control de rutinas, aforo de
 
 ---
 
-## 🏛️ Arquitectura del Sistema
+##  Arquitectura del Sistema
 El proyecto implementa el patrón de arquitectura **Modelo-Vista-Controlador (MVC)** sobre la plataforma **.NET 8.0 Windows**:
 
 * **Models:** Entidades de dominio con herencia y polimorfismo (`Persona`, `UsuarioBasico`, `Entrenador`, `EntrenadorPersonal`, `EntrenadorGimnasio`).
@@ -13,14 +13,14 @@ El proyecto implementa el patrón de arquitectura **Modelo-Vista-Controlador (MV
 
 ---
 
-## 📁 Estructura del Repositorio
+##  Estructura del Repositorio
 * `/documentacion/`: Documento oficial de planificación ágil (Entregable #1 en formato PDF).
 * `/src/`: Solución y código fuente del sistema en C#.
 * `datos_iniciales.json`: Semilla de datos inicial con 40 registros completos.
 
 ---
 
-## 🚀 Estado del Desarrollo (Sprint 1)
+##  Estado del Desarrollo (Sprint 1)
 * [x] **PBI 1:** Estructura base de la solución, modelos de usuarios y entrenadores, cálculo de IMC y persistencia JSON.
 * [ ] **PBI 2:** Gestión integral de rutinas de ejercicio y control de cargas.
 * [ ] **PBI 3:** Programación y aforo de clases grupales.
