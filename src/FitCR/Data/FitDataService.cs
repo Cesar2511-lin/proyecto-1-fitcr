@@ -4,7 +4,7 @@ using FitCR.Models;
 namespace FitCR.Data;
 
 /// <summary>
-/// Implementación concreta del repositorio utilizando persistencia JSON (Sprint 1: Usuarios y Entrenadores).
+/// Servicio de persistencia y gestion de datos mediante archivos JSON.
 /// </summary>
 public class FitDataService : IFitRepository
 {
@@ -14,6 +14,7 @@ public class FitDataService : IFitRepository
     private readonly string _rutaArchivo;
     private List<UsuarioBasico> _usuarios = new();
     private List<Entrenador> _entrenadores = new();
+    private List<ClaseGrupal> _clases = new();
 
     public FitDataService(string? rutaPersonalizada = null)
     {
@@ -23,6 +24,7 @@ public class FitDataService : IFitRepository
 
     private static string DeterminarRutaDatos()
     {
+        // Busca el archivo en la carpeta de ejecución o sube hacia la raíz del proyecto
         var opciones = new[]
         {
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "datos_iniciales.json"),
@@ -49,6 +51,7 @@ public class FitDataService : IFitRepository
         {
             _usuarios = new List<UsuarioBasico>();
             _entrenadores = new List<Entrenador>();
+            _clases = new List<ClaseGrupal>();
             return;
         }
 
@@ -58,6 +61,7 @@ public class FitDataService : IFitRepository
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
+            // Deserializar Usuarios Básicos
             if (root.TryGetProperty("UsuariosBasicos", out var elemUsuarios))
             {
                 _usuarios = JsonSerializer.Deserialize<List<UsuarioBasico>>(elemUsuarios.GetRawText(), new JsonSerializerOptions
@@ -66,6 +70,7 @@ public class FitDataService : IFitRepository
                 }) ?? new List<UsuarioBasico>();
             }
 
+            // Deserializar Entrenadores con tipado polimórfico
             _entrenadores = new List<Entrenador>();
             if (root.TryGetProperty("Entrenadores", out var elemEntrenadores))
             {
@@ -84,11 +89,22 @@ public class FitDataService : IFitRepository
                     }
                 }
             }
+
+            // Deserializar Clases Grupales
+            if (root.TryGetProperty("ClasesGrupales", out var elemClases))
+            {
+                _clases = JsonSerializer.Deserialize<List<ClaseGrupal>>(elemClases.GetRawText(), new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new List<ClaseGrupal>();
+            }
         }
         catch (Exception)
         {
+            // Respaldo de seguridad en caso de corrupción
             _usuarios = new List<UsuarioBasico>();
             _entrenadores = new List<Entrenador>();
+            _clases = new List<ClaseGrupal>();
         }
     }
 
@@ -106,7 +122,8 @@ public class FitDataService : IFitRepository
                     TotalRegistros = _usuarios.Count + _entrenadores.Count
                 },
                 UsuariosBasicos = _usuarios,
-                Entrenadores = _entrenadores
+                Entrenadores = _entrenadores,
+                ClasesGrupales = _clases
             };
 
             var json = JsonSerializer.Serialize(estructura, new JsonSerializerOptions
@@ -126,6 +143,8 @@ public class FitDataService : IFitRepository
 
     public List<Entrenador> ObtenerEntrenadores() => _entrenadores;
 
+    public List<ClaseGrupal> ObtenerClasesGrupales() => _clases;
+
     public void GuardarUsuario(UsuarioBasico usuario)
     {
         var index = _usuarios.FindIndex(u => u.Id == usuario.Id);
@@ -143,6 +162,20 @@ public class FitDataService : IFitRepository
     public void EliminarUsuario(string usuarioId)
     {
         _usuarios.RemoveAll(u => u.Id == usuarioId);
+        GuardarCambios();
+    }
+
+    public void GuardarClase(ClaseGrupal clase)
+    {
+        var index = _clases.FindIndex(c => c.Id == clase.Id);
+        if (index >= 0)
+        {
+            _clases[index] = clase;
+        }
+        else
+        {
+            _clases.Add(clase);
+        }
         GuardarCambios();
     }
 }

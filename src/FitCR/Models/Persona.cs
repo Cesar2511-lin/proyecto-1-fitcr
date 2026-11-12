@@ -1,8 +1,7 @@
 namespace FitCR.Models;
 
 /// <summary>
-/// Clase base abstracta que modela los datos comunes de cualquier persona en el sistema.
-/// Aplica el principio de Abstracción y Segregación de Interfaces.
+/// Clase base para las personas registradas en el sistema.
 /// </summary>
 public abstract class Persona
 {

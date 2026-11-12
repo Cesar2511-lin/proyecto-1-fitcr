@@ -3,15 +3,17 @@ using FitCR.Models;
 namespace FitCR.Data;
 
 /// <summary>
-/// Contrato del repositorio para abstraer el almacenamiento y persistencia de datos (Sprint 1).
+/// Interfaz para la persistencia y consulta de datos del sistema.
 /// </summary>
 public interface IFitRepository
 {
     List<UsuarioBasico> ObtenerUsuarios();
     List<Entrenador> ObtenerEntrenadores();
+    List<ClaseGrupal> ObtenerClasesGrupales();
 
     void GuardarUsuario(UsuarioBasico usuario);
     void EliminarUsuario(string usuarioId);
+    void GuardarClase(ClaseGrupal clase);
 
     void GuardarCambios();
     void CargarDatos();

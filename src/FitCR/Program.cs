@@ -1,4 +1,7 @@
-using FitCR.Controllers;
+using System;
+using System.IO;
+using System.Windows.Forms;
+using FitCR.Views;
 
 namespace FitCR;
 
@@ -7,12 +10,15 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        var controller = new UsuarioController();
-        var usuarios = controller.ListarUsuarios();
-        var entrenadores = controller.ListarEntrenadores();
-
-        Console.WriteLine($"Fit.CR - Sprint 1 Inicializado");
-        Console.WriteLine($"Usuarios registrados: {usuarios.Count}");
-        Console.WriteLine($"Entrenadores registrados: {entrenadores.Count}");
+        try
+        {
+            ApplicationConfiguration.Initialize();
+            Application.Run(new FormLogin());
+        }
+        catch (Exception ex)
+        {
+            File.WriteAllText("error.txt", ex.ToString());
+            Console.WriteLine(ex.ToString());
+        }
     }
 }

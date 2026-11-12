@@ -4,8 +4,7 @@ using FitCR.Models;
 namespace FitCR.Controllers;
 
 /// <summary>
-/// Controlador de la arquitectura MVC encargado de la gestión de usuarios,
-/// reglas de negocio de membresía y cálculos antropométricos.
+/// Controlador para la gestion y validacion de usuarios.
 /// </summary>
 public class UsuarioController
 {
