@@ -3,7 +3,7 @@ using FitCR.Models;
 namespace FitCR.Controllers;
 
 /// <summary>
-/// Provee calculos y metricas estadisticas para el panel principal.
+/// Provee calculos y metricas estadisticas para el panel principal y la consola ejecutiva.
 /// </summary>
 public class DashboardController
 {
@@ -17,6 +17,24 @@ public class DashboardController
         public int TotalRutinas { get; set; }
         public int DiasInactividad { get; set; }
         public int TotalInsignias { get; set; }
+    }
+
+    public class MetricasGlobalesGimnasio
+    {
+        public int TotalMiembros { get; set; }
+        public int MiembrosActivos { get; set; }
+        public int MiembrosInactivos { get; set; }
+        public int MiembrosBloqueados { get; set; }
+        public int TotalEntrenadores { get; set; }
+        public int EntrenadoresPersonales { get; set; }
+        public int EntrenadoresGimnasio { get; set; }
+        public int ClasesProgramadas { get; set; }
+        public int CuposTotales { get; set; }
+        public int CuposOcupados { get; set; }
+        public double OcupacionAforoPct { get; set; }
+        public int MiembrosEnRiesgoDesercion { get; set; }
+        public int TotalInsigniasOtorgadas { get; set; }
+        public int InsigniasInactividad { get; set; }
     }
 
     public MetricasDashboard CalcularMetricas(UsuarioBasico usuario)
@@ -47,6 +65,33 @@ public class DashboardController
             < 30.0 => "Sobrepeso",
             _ => "Obesidad"
         };
+
+        return m;
+    }
+
+    public MetricasGlobalesGimnasio CalcularMetricasGlobales(List<UsuarioBasico> usuarios, List<Entrenador> entrenadores, List<ClaseGrupal> clases)
+    {
+        var m = new MetricasGlobalesGimnasio
+        {
+            TotalMiembros = usuarios.Count,
+            MiembrosActivos = usuarios.Count(u => string.Equals(u.Estado, "Activo", StringComparison.OrdinalIgnoreCase)),
+            MiembrosInactivos = usuarios.Count(u => string.Equals(u.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase)),
+            MiembrosBloqueados = usuarios.Count(u => string.Equals(u.Estado, "Bloqueado", StringComparison.OrdinalIgnoreCase)),
+            TotalEntrenadores = entrenadores.Count,
+            EntrenadoresPersonales = entrenadores.Count(e => e is EntrenadorPersonal),
+            EntrenadoresGimnasio = entrenadores.Count(e => e is EntrenadorGimnasio),
+            ClasesProgramadas = clases.Count,
+            CuposTotales = clases.Sum(c => c.CupoMaximo),
+            CuposOcupados = clases.Sum(c => c.Inscritos.Count),
+            MiembrosEnRiesgoDesercion = usuarios.Count(u => u.DiasDesdeUltimoEntrenamiento() > 7),
+            TotalInsigniasOtorgadas = usuarios.Sum(u => u.Insignias.Count),
+            InsigniasInactividad = usuarios.Sum(u => u.Insignias.Count(i => i.EsVerguenza))
+        };
+
+        if (m.CuposTotales > 0)
+        {
+            m.OcupacionAforoPct = Math.Round(((double)m.CuposOcupados / m.CuposTotales) * 100.0, 1);
+        }
 
         return m;
     }

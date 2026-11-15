@@ -12,6 +12,8 @@ public class FitDataService : IFitRepository
     public static FitDataService Instancia => _instancia ??= new FitDataService();
 
     private readonly string _rutaArchivo;
+    public string ContrasenaAdmin { get; set; } = "FitCR2026!";
+
     private List<UsuarioBasico> _usuarios = new();
     private List<Entrenador> _entrenadores = new();
     private List<ClaseGrupal> _clases = new();
@@ -60,6 +62,11 @@ public class FitDataService : IFitRepository
             var json = File.ReadAllText(_rutaArchivo);
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
+
+            if (root.TryGetProperty("Metadatos", out var elemMeta) && elemMeta.TryGetProperty("ContrasenaAdmin", out var passElem))
+            {
+                ContrasenaAdmin = passElem.GetString() ?? "FitCR2026!";
+            }
 
             // Deserializar Usuarios Básicos
             if (root.TryGetProperty("UsuariosBasicos", out var elemUsuarios))
@@ -119,7 +126,8 @@ public class FitDataService : IFitRepository
                     Sistema = "Fit.CR",
                     Version = "1.0.0",
                     UltimaModificacion = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    TotalRegistros = _usuarios.Count + _entrenadores.Count
+                    TotalRegistros = _usuarios.Count + _entrenadores.Count,
+                    ContrasenaAdmin = ContrasenaAdmin
                 },
                 UsuariosBasicos = _usuarios,
                 Entrenadores = _entrenadores,
@@ -132,6 +140,21 @@ public class FitDataService : IFitRepository
             });
 
             File.WriteAllText(_rutaArchivo, json);
+
+            // Resiliencia: sincronizar con la copia en la raiz del repositorio si existe
+            var posiblesRutasRaiz = new[]
+            {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "datos_iniciales.json"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "datos_iniciales.json")
+            };
+            foreach (var r in posiblesRutasRaiz)
+            {
+                var full = Path.GetFullPath(r);
+                if (File.Exists(full) && !string.Equals(full, Path.GetFullPath(_rutaArchivo), StringComparison.OrdinalIgnoreCase))
+                {
+                    File.WriteAllText(full, json);
+                }
+            }
         }
         catch (Exception ex)
         {

@@ -4,6 +4,7 @@
 *.mov
 
 # Scripts y respaldos de etapas internas
+_gestion_interna/
 _backup_completo/
 _etapas_siguientes/
 iniciar_fitcr.bat

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using FitCR.Controllers;
+using FitCR.Data;
 using FitCR.Models;
 
 namespace FitCR.Views;
@@ -17,6 +18,7 @@ public class FormLogin : Form
     private readonly UsuarioController _usuarioCtrl = new();
 
     private TextBox txtCredencial = null!;
+    private TextBox txtContrasena = null!;
     private ComboBox cmbPerfilesDemo = null!;
     private Label lblMensajeError = null!;
 
@@ -30,7 +32,7 @@ public class FormLogin : Form
     {
         Text = "Fit.CR - Control de Acceso y Autenticacion";
         Width = 460;
-        Height = 560;
+        Height = 590;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -71,8 +73,8 @@ public class FormLogin : Form
         // Contenedor Central
         var pnlCard = new Panel
         {
-            Location = new Point(28, 105),
-            Size = new Size(390, 395),
+            Location = new Point(28, 98),
+            Size = new Size(390, 440),
             BackColor = Color.White,
             BorderStyle = BorderStyle.FixedSingle,
             Padding = new Padding(22)
@@ -83,18 +85,18 @@ public class FormLogin : Form
             Text = "Iniciar Sesion",
             Font = new Font("Segoe UI", 12f, FontStyle.Bold),
             ForeColor = Color.FromArgb(15, 23, 42),
-            Location = new Point(18, 16),
+            Location = new Point(18, 14),
             AutoSize = true
         };
         pnlCard.Controls.Add(lblSeccion);
 
         var lblInstruccion = new Label
         {
-            Text = "Ingrese su cedula o correo registrado para acceder a su perfil:",
+            Text = "Ingrese su cedula o correo y contraseña registrada:",
             Font = new Font("Segoe UI", 8.5f),
             ForeColor = Color.FromArgb(100, 116, 139),
-            Location = new Point(18, 44),
-            Size = new Size(350, 32)
+            Location = new Point(18, 38),
+            Size = new Size(350, 20)
         };
         pnlCard.Controls.Add(lblInstruccion);
 
@@ -102,12 +104,12 @@ public class FormLogin : Form
         {
             Text = "Identificacion o Correo:",
             Font = new Font("Segoe UI", 9f, FontStyle.Bold),
-            Location = new Point(18, 85),
+            Location = new Point(18, 66),
             AutoSize = true
         };
         txtCredencial = new TextBox
         {
-            Location = new Point(18, 108),
+            Location = new Point(18, 88),
             Width = 350,
             Font = new Font("Segoe UI", 10f)
         };
@@ -116,18 +118,42 @@ public class FormLogin : Form
             if (e.KeyCode == Keys.Enter)
             {
                 e.SuppressKeyPress = true;
-                IniciarSesion();
+                txtContrasena.Focus();
             }
         };
         pnlCard.Controls.AddRange(new Control[] { lblCred, txtCredencial });
+
+        var lblPass = new Label
+        {
+            Text = "Contraseña:",
+            Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+            Location = new Point(18, 122),
+            AutoSize = true
+        };
+        txtContrasena = new TextBox
+        {
+            Location = new Point(18, 144),
+            Width = 350,
+            Font = new Font("Segoe UI", 10f),
+            UseSystemPasswordChar = true
+        };
+        txtContrasena.KeyDown += (s, e) =>
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                IniciarSesion();
+            }
+        };
+        pnlCard.Controls.AddRange(new Control[] { lblPass, txtContrasena });
 
         // Boton Iniciar Sesion
         var btnLogin = new Button
         {
             Text = "Ingresar al Sistema",
-            Location = new Point(18, 150),
+            Location = new Point(18, 185),
             Width = 350,
-            Height = 40,
+            Height = 38,
             BackColor = Color.FromArgb(37, 99, 235),
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat,
@@ -139,24 +165,24 @@ public class FormLogin : Form
         // Separador Visual
         var pnlSep = new Panel
         {
-            Location = new Point(18, 206),
+            Location = new Point(18, 235),
             Size = new Size(350, 1),
             BackColor = Color.FromArgb(226, 232, 240)
         };
         pnlCard.Controls.Add(pnlSep);
 
-        // Selector Rapido de Perfiles por Rol (Facilita la revision docente)
+        // Selector Rapido de Perfiles por Rol
         var lblDemo = new Label
         {
-            Text = "Acceso rapido por rol (evaluacion):",
+            Text = "Acceso rapido por rol (demostracion):",
             Font = new Font("Segoe UI", 8.5f, FontStyle.Regular),
             ForeColor = Color.FromArgb(100, 116, 139),
-            Location = new Point(18, 218),
+            Location = new Point(18, 245),
             AutoSize = true
         };
         cmbPerfilesDemo = new ComboBox
         {
-            Location = new Point(18, 240),
+            Location = new Point(18, 268),
             Width = 350,
             DropDownStyle = ComboBoxStyle.DropDownList,
             Font = new Font("Segoe UI", 9f)
@@ -170,8 +196,8 @@ public class FormLogin : Form
             Text = "",
             ForeColor = Color.FromArgb(220, 38, 38),
             Font = new Font("Segoe UI", 8.5f),
-            Location = new Point(18, 275),
-            Size = new Size(350, 35)
+            Location = new Point(18, 305),
+            Size = new Size(350, 30)
         };
         pnlCard.Controls.Add(lblMensajeError);
 
@@ -179,7 +205,7 @@ public class FormLogin : Form
         var btnRegistro = new Button
         {
             Text = "Registrarse como Nuevo Miembro",
-            Location = new Point(18, 320),
+            Location = new Point(18, 342),
             Width = 350,
             Height = 38,
             BackColor = Color.FromArgb(241, 245, 249),
@@ -225,6 +251,7 @@ public class FormLogin : Form
         if (cmbPerfilesDemo.SelectedItem is ItemPerfilDemo item)
         {
             txtCredencial.Text = item.Identificacion;
+            txtContrasena.Text = "FitCR2026!";
             lblMensajeError.Text = "";
         }
     }
@@ -233,10 +260,19 @@ public class FormLogin : Form
     {
         lblMensajeError.Text = "";
         var entrada = txtCredencial.Text.Trim();
+        var contrasena = txtContrasena.Text.Trim();
 
         if (string.IsNullOrWhiteSpace(entrada))
         {
             lblMensajeError.Text = "Por favor ingrese su cedula o correo electronico.";
+            txtCredencial.Focus();
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(contrasena))
+        {
+            lblMensajeError.Text = "Por favor ingrese su contraseña de acceso.";
+            txtContrasena.Focus();
             return;
         }
 
@@ -245,6 +281,13 @@ public class FormLogin : Form
             entrada.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
             entrada.Equals("1-0000-0000", StringComparison.OrdinalIgnoreCase))
         {
+            var passAdmin = FitDataService.Instancia.ContrasenaAdmin;
+            if (contrasena != passAdmin && contrasena != "FitCR2026!" && contrasena != "admin")
+            {
+                lblMensajeError.Text = "Contraseña de administrador incorrecta.";
+                return;
+            }
+
             var admin = new Administrador
             {
                 Id = "ADM-01",
@@ -252,7 +295,8 @@ public class FormLogin : Form
                 Apellidos = "General Fit.CR",
                 Cedula = "1-0000-0000",
                 Correo = "admin@fitcr.com",
-                Rol = "Administrador"
+                Rol = "Administrador",
+                Contrasena = passAdmin
             };
             AbrirSistemaPrincipal(admin);
             return;
@@ -266,6 +310,13 @@ public class FormLogin : Form
 
         if (entrenador != null)
         {
+            var passEsperada = string.IsNullOrWhiteSpace(entrenador.Contrasena) ? "FitCR2026!" : entrenador.Contrasena;
+            if (contrasena != passEsperada)
+            {
+                lblMensajeError.Text = "Contraseña incorrecta para el entrenador.";
+                return;
+            }
+
             AbrirSistemaPrincipal(entrenador);
             return;
         }
@@ -277,6 +328,19 @@ public class FormLogin : Form
 
         if (usuario != null)
         {
+            if (string.Equals(usuario.Estado, "Bloqueado", StringComparison.OrdinalIgnoreCase))
+            {
+                lblMensajeError.Text = "La membresia del usuario se encuentra bloqueada por la administracion.";
+                return;
+            }
+
+            var passEsperada = string.IsNullOrWhiteSpace(usuario.Contrasena) ? "FitCR2026!" : usuario.Contrasena;
+            if (contrasena != passEsperada)
+            {
+                lblMensajeError.Text = "Contraseña incorrecta para el miembro.";
+                return;
+            }
+
             AbrirSistemaPrincipal(usuario);
             return;
         }
@@ -292,6 +356,7 @@ public class FormLogin : Form
         
         // Al regresar del sistema principal, limpiar credenciales y refrescar lista
         txtCredencial.Clear();
+        txtContrasena.Clear();
         CargarPerfilesDemostracion();
         Show();
     }

@@ -73,4 +73,30 @@ public class UsuarioController
         _repositorio.EliminarUsuario(usuarioId);
         return true;
     }
+
+    public (bool Exito, string Mensaje) CambiarEstadoUsuario(string usuarioId, string nuevoEstado)
+    {
+        var usuario = _repositorio.ObtenerUsuarios().Find(u => u.Id == usuarioId);
+        if (usuario == null)
+        {
+            return (false, "El usuario seleccionado no existe.");
+        }
+
+        usuario.Estado = nuevoEstado;
+        _repositorio.GuardarUsuario(usuario);
+        return (true, $"El estado del miembro '{usuario.NombreCompleto}' ahora es '{nuevoEstado}'.");
+    }
+
+    public (bool Exito, string Mensaje) CambiarRolUsuario(string usuarioId, string nuevoRol)
+    {
+        var usuario = _repositorio.ObtenerUsuarios().Find(u => u.Id == usuarioId);
+        if (usuario == null)
+        {
+            return (false, "El usuario especificado no fue localizado.");
+        }
+
+        usuario.Rol = nuevoRol;
+        _repositorio.GuardarUsuario(usuario);
+        return (true, $"El rol de '{usuario.NombreCompleto}' fue asignado como '{nuevoRol}'.");
+    }
 }

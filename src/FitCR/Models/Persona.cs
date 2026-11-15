@@ -13,6 +13,7 @@ public abstract class Persona
     public int Edad { get; set; }
     public string Rol { get; set; } = string.Empty;
     public string Estado { get; set; } = "Activo";
+    public string Contrasena { get; set; } = "FitCR2026!";
 
     public string NombreCompleto => $"{Nombre} {Apellidos}".Trim();
 
