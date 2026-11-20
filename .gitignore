@@ -8,6 +8,7 @@ _gestion_interna/
 _backup_completo/
 _etapas_siguientes/
 iniciar_fitcr.bat
+iniciar_copiloto_defensa.bat
 subir_semana_*.bat
 subir_semana_*.ps1
 
