@@ -7,8 +7,11 @@
 _gestion_interna/
 _backup_completo/
 _etapas_siguientes/
+_entregables_moodle/
 iniciar_fitcr.bat
 iniciar_copiloto_defensa.bat
+iniciar_copiloto_debug.bat
+liberar_memoria_copiloto.bat
 subir_semana_*.bat
 subir_semana_*.ps1
 
