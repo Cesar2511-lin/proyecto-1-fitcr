@@ -10,7 +10,7 @@ Sistema de informacion de escritorio para gestion de acondicionamiento fisico, c
 * **Facultad y Sede:** Facultad de Ingenieria y Tecnologias de Informacion - Campus Heredia
 * **Carrera:** Bachillerato en Ingenieria Informatica
 * **Curso:** Tecnicas de Programacion
-* **Estudiante:** Julio Cesar Garcia Serrano (DIMEX: 155830134429)
+* **Estudiante:** Julio Cesar Garcia Serrano
 * **Docente:** Prof. Luis Felipe Mora Umaña
 * **Repositorio Oficial:** https://github.com/Cesar2511-lin/proyecto-1-fitcr.git
 * **Tablero Jira Oficial:** https://edu-team-ygfq61ur.atlassian.net/jira/software/projects/FIT/boards/2
